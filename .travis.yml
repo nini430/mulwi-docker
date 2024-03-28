@@ -1,0 +1,22 @@
+language: generic
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t niniko123/niniko-client -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true niniko123/niniko-client npm run test
+
+after_success:
+  - docker build -t niniko123/niniko-client ./client
+  - docker build -t niniko123/niniko-worker ./worker
+  - docker build -t niniko123/niniko-server ./server
+  - docker build -t niniko123/niniko-nginx ./nginx
+  - echo "$DOCKER_PASSWORD" | docker login -u niniko123 --password-stdin
+  - docker push niniko123/niniko-client
+  - docker push niniko123/niniko-worker
+  - docker push niniko123/niniko-server
+  - docker push niniko123/niniko-nginx
+
